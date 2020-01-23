@@ -25,10 +25,13 @@ func main() {
 
     result = RunSimulation(GetEpsilonGreedyAllocation)
     fmt.Printf("Epsilon-greedy strategy result:\t%f\n", result)
+
+    result = RunSimulation(GetEpsilonFirstAllocation)
+    fmt.Printf("Epsilon-first strategy result:\t%f\n", result)
 }
 
-func GetRandomAllocation(numLevers int, allocationHistory, resultsHistory [][]float64) []float64 {
-    allocation := make([]float64, numLevers)
-    allocation[int(rand.Int63n(int64(numLevers)))] = 1.0
+func GetRandomAllocation(allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
+    allocation := make([]float64, simParams.NumLevers)
+    allocation[int(rand.Int63n(int64(simParams.NumLevers)))] = 1.0
     return allocation
 }

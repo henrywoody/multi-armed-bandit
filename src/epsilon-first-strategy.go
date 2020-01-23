@@ -5,13 +5,12 @@ import (
 )
 
 
-func GetEpsilonGreedyAllocation(allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
+func GetEpsilonFirstAllocation(allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
     const epsilon = 0.1
 
-    roundNumber := len(allocationHistory)
-
     var leverIndex int
-    if roundNumber == 0 || FlipCoin(epsilon) {
+    roundNumber := len(allocationHistory)
+    if roundNumber < int(epsilon * float64(simParams.NumRounds)) {
         leverIndex = int(rand.Int63n(int64(simParams.NumLevers)))
     } else {
         leverIndex = GetBestLeverIndex(allocationHistory, resultsHistory)

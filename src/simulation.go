@@ -9,21 +9,28 @@ type Lever struct {
 }
 
 
-func RunSimulation(getAllocation func(int, [][]float64, [][]float64) []float64) float64 {
+type SimulationParameters struct {
+    NumLevers int
+    NumRounds int
+}
+
+
+func RunSimulation(getAllocation func([][]float64, [][]float64, SimulationParameters) []float64) float64 {
     levers := setUpLevers()
-    numLevers := len(levers)
+    simParams := SimulationParameters{
+        NumLevers: len(levers),
+        NumRounds: 1000,
+    }
 
     allocationHistory := [][]float64{}
     resultsHistory := [][]float64{}
 
-    const NUM_ROUNDS = 1000
-
-    for i := 0; i < NUM_ROUNDS; i++ {
+    for i := 0; i < simParams.NumRounds; i++ {
         if verbose {
             fmt.Printf("\nRound: %d\n", i)
         }
 
-        allocation := getAllocation(numLevers, allocationHistory, resultsHistory)
+        allocation := getAllocation(allocationHistory, resultsHistory, simParams)
 
         if verbose {
             fmt.Printf("Allocation: %v\n", allocation)
