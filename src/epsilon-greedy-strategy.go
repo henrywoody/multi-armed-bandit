@@ -7,7 +7,11 @@ import (
 
 func GetEpsilonGreedyAllocation(allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
     const epsilon = 0.1
+    return getEpsilonGreedyAllocationWithVariableEpsilon(epsilon, allocationHistory, resultsHistory, simParams)
+}
 
+
+func getEpsilonGreedyAllocationWithVariableEpsilon(epsilon float64, allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
     roundNumber := len(allocationHistory)
 
     var leverIndex int

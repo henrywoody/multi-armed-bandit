@@ -21,13 +21,16 @@ func main() {
     flag.Parse()
 
     result := RunSimulation(GetRandomAllocation)
-    fmt.Printf("Random strategy result:\t\t%f\n", result)
+    fmt.Printf("Random strategy result:\t\t\t%f\n", result)
 
     result = RunSimulation(GetEpsilonGreedyAllocation)
-    fmt.Printf("Epsilon-greedy strategy result:\t%f\n", result)
+    fmt.Printf("Epsilon-greedy strategy result:\t\t%f\n", result)
 
     result = RunSimulation(GetEpsilonFirstAllocation)
-    fmt.Printf("Epsilon-first strategy result:\t%f\n", result)
+    fmt.Printf("Epsilon-first strategy result:\t\t%f\n", result)
+
+    result = RunSimulation(GetEpsilonDecreasingAllocation)
+    fmt.Printf("Epsilon-decreasing strategy result:\t%f\n", result)
 }
 
 func GetRandomAllocation(allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
