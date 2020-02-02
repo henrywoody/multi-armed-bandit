@@ -20,21 +20,19 @@ func main() {
     flag.BoolVar(&verbose, "v", false, "Decide whether or not to print information about each choice and result on each iteration.")
     flag.Parse()
 
-    result := RunSimulation(GetRandomAllocation)
-    fmt.Printf("Random strategy result:\t\t\t%f\n", result)
+    randomAgent := RandomAgent{}
+    result := RunSimulation(&randomAgent)
+    fmt.Printf("Random strategy result:\t\t\t%.2f\n", result)
 
-    result = RunSimulation(GetEpsilonGreedyAllocation)
-    fmt.Printf("Epsilon-greedy strategy result:\t\t%f\n", result)
+    epsilonGreedyAgent := EpsilonGreedyAgent{ Epsilon: 0.1 }
+    result = RunSimulation(&epsilonGreedyAgent)
+    fmt.Printf("Epsilon-greedy strategy result:\t\t%.2f\n", result)
 
-    result = RunSimulation(GetEpsilonFirstAllocation)
-    fmt.Printf("Epsilon-first strategy result:\t\t%f\n", result)
+    epsilonFirstAgent := EpsilonFirstAgent{ Epsilon: 0.1 }
+    result = RunSimulation(&epsilonFirstAgent)
+    fmt.Printf("Epsilon-first strategy result:\t\t%.2f\n", result)
 
-    result = RunSimulation(GetEpsilonDecreasingAllocation)
-    fmt.Printf("Epsilon-decreasing strategy result:\t%f\n", result)
-}
-
-func GetRandomAllocation(allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
-    allocation := make([]float64, simParams.NumLevers)
-    allocation[int(rand.Int63n(int64(simParams.NumLevers)))] = 1.0
-    return allocation
+    epsilonDecreasingAgent := EpsilonDecreasingAgent{}
+    result = RunSimulation(&epsilonDecreasingAgent)
+    fmt.Printf("Epsilon-decreasing strategy result:\t%.2f\n", result)
 }

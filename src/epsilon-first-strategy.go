@@ -5,18 +5,20 @@ import (
 )
 
 
-func GetEpsilonFirstAllocation(allocationHistory, resultsHistory [][]float64, simParams SimulationParameters) []float64 {
-    const epsilon = 0.1
+type EpsilonFirstAgent struct {
+    Epsilon float64
+}
 
+
+func (agent *EpsilonFirstAgent) Policy(state State) Action {
     var leverIndex int
-    roundNumber := len(allocationHistory)
-    if roundNumber < int(epsilon * float64(simParams.NumRounds)) {
-        leverIndex = int(rand.Int63n(int64(simParams.NumLevers)))
+    if state.Time < int(agent.Epsilon * float64(state.SimulationParameters.NumRounds)) {
+        leverIndex = int(rand.Int63n(int64(state.SimulationParameters.NumLevers)))
     } else {
-        leverIndex = GetBestLeverIndex(allocationHistory, resultsHistory)
+        leverIndex = GetBestLeverIndex(state)
     }
 
-    allocation := make([]float64, simParams.NumLevers)
-    allocation[leverIndex] = 1.0
-    return allocation
+    action := Action(make([]float64, state.SimulationParameters.NumLevers))
+    action[leverIndex] = 1.0
+    return action
 }

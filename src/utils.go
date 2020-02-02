@@ -5,7 +5,7 @@ import (
 )
 
 
-func FlipCoin(probability float64) bool {
+func BernoulliDistribution(probability float64) bool {
     return rand.Float64() < probability
 }
 
@@ -15,35 +15,31 @@ func NormalDistribution(mean, stdDev float64) float64 {
 }
 
 
-func GetBestLeverIndex(allocationHistory, resultsHistory [][]float64) int {
-    numRounds := len(allocationHistory)
-
-    if numRounds == 0 {
+func GetBestLeverIndex(state State) int {
+    if state.Time == 0 {
         return 0
     }
 
-    numLevers := len(allocationHistory[0])
+    actionTotals := make([]float64, state.SimulationParameters.NumLevers)
+    rewardsTotals := make([]float64, state.SimulationParameters.NumLevers)
 
-    allocationTotals := make([]float64, numLevers)
-    resultsTotals := make([]float64, numLevers)
+    for i := 0; i < state.Time; i++ {
+        action := state.ActionHistory[i]
+        rewards := state.RewardsHistory[i]
 
-    for i := 0; i < numRounds; i++ {
-        allocation := allocationHistory[i]
-        results := resultsHistory[i]
-
-        for j := 0; j < numLevers; j++ {
-            allocationTotals[j] += allocation[j]
-            resultsTotals[j] += results[j]
+        for j := 0; j < state.SimulationParameters.NumLevers; j++ {
+            actionTotals[j] += action[j]
+            rewardsTotals[j] += rewards[j]
         }
     }
 
-    leverScores := make([]float64, numLevers)
+    leverScores := make([]float64, state.SimulationParameters.NumLevers)
 
-    for i := 0; i < numLevers; i++ {
-        if (allocationTotals[i] == 0.0) {
+    for i := 0; i < state.SimulationParameters.NumLevers; i++ {
+        if (actionTotals[i] == 0.0) {
             continue
         }
-        leverScores[i] = resultsTotals[i] / allocationTotals[i]
+        leverScores[i] = rewardsTotals[i] / actionTotals[i]
     }
 
     return getMaxIndex(leverScores)

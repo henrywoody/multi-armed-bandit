@@ -5,7 +5,27 @@ import (
 )
 
 type Lever struct {
-    Pull func() float64
+    Pull func(float64) float64
+}
+
+
+type Action []float64
+
+
+type Rewards []float64
+
+
+type Agent interface {
+    Policy(State) Action
+}
+
+
+type State struct {
+    Time int
+    Levers []Lever
+    ActionHistory []Action
+    RewardsHistory []Rewards
+    SimulationParameters SimulationParameters
 }
 
 
@@ -15,98 +35,99 @@ type SimulationParameters struct {
 }
 
 
-func RunSimulation(getAllocation func([][]float64, [][]float64, SimulationParameters) []float64) float64 {
+func RunSimulation(agent Agent) float64 {
     levers := setUpLevers()
-    simParams := SimulationParameters{
-        NumLevers: len(levers),
-        NumRounds: 1000,
+
+    state := State{
+        Levers: levers,
+        SimulationParameters: SimulationParameters{
+            NumLevers: len(levers),
+            NumRounds: 1000,
+        },
     }
 
-    allocationHistory := [][]float64{}
-    resultsHistory := [][]float64{}
-
-    for i := 0; i < simParams.NumRounds; i++ {
+    for state.Time = 0; state.Time < state.SimulationParameters.NumRounds; state.Time++ {
         if verbose {
-            fmt.Printf("\nRound: %d\n", i)
+            fmt.Printf("\nRound: %d\n", state.Time)
         }
 
-        allocation := getAllocation(allocationHistory, resultsHistory, simParams)
+        action := agent.Policy(state)
 
         if verbose {
-            fmt.Printf("Allocation: %v\n", allocation)
+            fmt.Printf("Action: %v\n", action)
         }
 
-        results := EvaluateAllocation(allocation, levers)
+        rewards := EvaluateAction(action, state.Levers)
 
         if verbose {
-            fmt.Printf("Results: %v\n", results)
+            fmt.Printf("Rewards: %v\n", rewards)
         }
 
-        allocationHistory = append(allocationHistory, allocation)
-        resultsHistory = append(resultsHistory, results)
+        state.ActionHistory = append(state.ActionHistory, action)
+        state.RewardsHistory = append(state.RewardsHistory, rewards)
     }
 
-    return GetTotalResults(resultsHistory)
+    return GetTotalRewards(state.RewardsHistory)
 }
 
 
 func setUpLevers() []Lever {
     return []Lever{
         {
-            Pull: func() float64 {
+            Pull: func(bet float64) float64 {
                 valueMean := 20.0
                 valueStdDev := 5.0
-                return NormalDistribution(valueMean, valueStdDev)
+                return bet * NormalDistribution(valueMean, valueStdDev)
             },
         },
         {
-            Pull: func() float64 {
+            Pull: func(bet float64) float64 {
                 valueMean := 90.0
                 valueStdDev := 10.0
-                return NormalDistribution(valueMean, valueStdDev)
+                return bet * NormalDistribution(valueMean, valueStdDev)
             },
         },
         {
-            Pull: func() float64 {
+            Pull: func(bet float64) float64 {
                 valueMean := 80.0
                 valueStdDev := 20.0
-                return NormalDistribution(valueMean, valueStdDev)
+                return bet * NormalDistribution(valueMean, valueStdDev)
             },
         },
         {
-            Pull: func() float64 {
+            Pull: func(bet float64) float64 {
                 valueMean := 75.0
                 valueStdDev := 30.0
-                return NormalDistribution(valueMean, valueStdDev)
+                return bet * NormalDistribution(valueMean, valueStdDev)
             },
         },
         {
-            Pull: func() float64 {
+            Pull: func(bet float64) float64 {
                 valueMean := 85.0
                 valueStdDev := 30.0
-                return NormalDistribution(valueMean, valueStdDev)
+                return bet * NormalDistribution(valueMean, valueStdDev)
             },
         },
     }
 }
 
 
-func EvaluateAllocation(allocation []float64, levers []Lever) []float64 {
-    results := make([]float64, len(levers))
+func EvaluateAction(action Action, levers []Lever) []float64 {
+    results := Rewards(make([]float64, len(levers)))
 
     for i, lever := range levers {
-        results[i] = lever.Pull() * allocation[i]
+        results[i] = lever.Pull(action[i])
     }
 
     return results
 }
 
 
-func GetTotalResults(resultsHistory [][]float64) float64 {
+func GetTotalRewards(rewardsHistory []Rewards) float64 {
     total := 0.0
-    for _, results := range resultsHistory {
-        for _, result := range results {
-            total += result
+    for _, rewards := range rewardsHistory {
+        for _, reward := range rewards {
+            total += reward
         }
     }
     return total
