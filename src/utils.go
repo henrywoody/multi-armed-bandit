@@ -12,46 +12,47 @@ func NormalDistribution(mean, stdDev float64) float64 {
 	return rand.NormFloat64()*stdDev + mean
 }
 
-func GetBestLeverIndex(state State) int {
+type LeverMetric struct {
+	PullCount   int
+	RewardTotal float64
+}
+
+func GetBestLever(state State) *Lever {
 	if state.Time == 0 {
-		return 0
+		return nil
 	}
 
-	actionTotals := make([]float64, state.SimulationParameters.NumLevers)
-	rewardsTotals := make([]float64, state.SimulationParameters.NumLevers)
+	leverMetrics := make(map[*Lever]LeverMetric, len(state.Levers))
 
 	for i := 0; i < state.Time; i++ {
 		action := state.ActionHistory[i]
-		rewards := state.RewardsHistory[i]
-
-		for j := 0; j < state.SimulationParameters.NumLevers; j++ {
-			actionTotals[j] += action[j]
-			rewardsTotals[j] += rewards[j]
+		reward := state.RewardHistory[i]
+		prevMetrics, _ := leverMetrics[action.Lever]
+		leverMetrics[action.Lever] = LeverMetric{
+			PullCount:   prevMetrics.PullCount + 1,
+			RewardTotal: prevMetrics.RewardTotal + float64(reward),
 		}
 	}
 
-	leverScores := make([]float64, state.SimulationParameters.NumLevers)
+	leverScores := make(map[*Lever]float64, len(state.Levers))
 
-	for i := 0; i < state.SimulationParameters.NumLevers; i++ {
-		if actionTotals[i] == 0.0 {
-			continue
-		}
-		leverScores[i] = rewardsTotals[i] / actionTotals[i]
+	for lever, metrics := range leverMetrics {
+		leverScores[lever] = metrics.RewardTotal / float64(metrics.PullCount)
 	}
 
-	return getMaxIndex(leverScores)
+	return getMaxLeverKey(leverScores)
 }
 
-func getMaxIndex(array []float64) int {
-	var maxIndex int
+func getMaxLeverKey(scores map[*Lever]float64) *Lever {
+	var maxLever *Lever
 	var maxValue float64
 
-	for i, e := range array {
-		if i == 0 || e > maxValue {
-			maxIndex = i
-			maxValue = e
+	for lever, value := range scores {
+		if lever == nil || value > maxValue {
+			maxLever = lever
+			maxValue = value
 		}
 	}
 
-	return maxIndex
+	return maxLever
 }

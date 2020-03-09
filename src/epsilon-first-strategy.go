@@ -9,14 +9,15 @@ type EpsilonFirstAgent struct {
 }
 
 func (agent *EpsilonFirstAgent) Policy(state State) Action {
-	var leverIndex int
+	var lever *Lever
 	if state.Time < int(agent.Epsilon*float64(state.SimulationParameters.NumRounds)) {
-		leverIndex = int(rand.Int63n(int64(state.SimulationParameters.NumLevers)))
+		leverIndex := int(rand.Int63n(int64(state.SimulationParameters.NumLevers)))
+		lever = &state.Levers[leverIndex]
 	} else {
-		leverIndex = GetBestLeverIndex(state)
+		lever = GetBestLever(state)
 	}
 
-	action := Action(make([]float64, state.SimulationParameters.NumLevers))
-	action[leverIndex] = 1.0
-	return action
+	return Action{
+		Lever: lever,
+	}
 }

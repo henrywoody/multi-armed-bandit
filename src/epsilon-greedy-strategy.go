@@ -12,15 +12,16 @@ func (agent *EpsilonGreedyAgent) Policy(state State) Action {
 	return getEpsilonGreedyAllocationWithVariableEpsilon(agent.Epsilon, state)
 }
 
-func getEpsilonGreedyAllocationWithVariableEpsilon(epsilon float64, state State) []float64 {
-	var leverIndex int
+func getEpsilonGreedyAllocationWithVariableEpsilon(epsilon float64, state State) Action {
+	var lever *Lever
 	if state.Time == 0 || BernoulliDistribution(epsilon) {
-		leverIndex = int(rand.Int63n(int64(state.SimulationParameters.NumLevers)))
+		leverIndex := int(rand.Int63n(int64(len(state.Levers))))
+		lever = &state.Levers[leverIndex]
 	} else {
-		leverIndex = GetBestLeverIndex(state)
+		lever = GetBestLever(state)
 	}
 
-	action := Action(make([]float64, state.SimulationParameters.NumLevers))
-	action[leverIndex] = 1.0
-	return action
+	return Action{
+		Lever: lever,
+	}
 }

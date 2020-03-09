@@ -7,7 +7,9 @@ import (
 type RandomAgent struct{}
 
 func (agent *RandomAgent) Policy(state State) Action {
-	action := Action(make([]float64, state.SimulationParameters.NumLevers))
-	action[int(rand.Int63n(int64(state.SimulationParameters.NumLevers)))] = 1.0
-	return action
+	leverIndex := int(rand.Int63n(int64(len(state.Levers))))
+	lever := &state.Levers[leverIndex]
+	return Action{
+		Lever: lever,
+	}
 }

@@ -5,12 +5,14 @@ import (
 )
 
 type Lever struct {
-	Pull func(float64) float64
+	Pull func() Reward
 }
 
-type Action []float64
+type Action struct {
+	Lever *Lever
+}
 
-type Rewards []float64
+type Reward float64
 
 type Agent interface {
 	Policy(State) Action
@@ -20,7 +22,7 @@ type State struct {
 	Time                 int
 	Levers               []Lever
 	ActionHistory        []Action
-	RewardsHistory       []Rewards
+	RewardHistory        []Reward
 	SimulationParameters SimulationParameters
 }
 
@@ -51,75 +53,67 @@ func RunSimulation(agent Agent) float64 {
 			fmt.Printf("Action: %v\n", action)
 		}
 
-		rewards := EvaluateAction(action, state.Levers)
+		reward := performAction(action)
 
 		if verbose {
-			fmt.Printf("Rewards: %v\n", rewards)
+			fmt.Printf("Reward: %d\n", float64(reward))
 		}
 
 		state.ActionHistory = append(state.ActionHistory, action)
-		state.RewardsHistory = append(state.RewardsHistory, rewards)
+		state.RewardHistory = append(state.RewardHistory, reward)
 	}
 
-	return GetTotalRewards(state.RewardsHistory)
+	return GetRewardTotal(state.RewardHistory)
 }
 
 func setUpLevers() []Lever {
 	return []Lever{
 		{
-			Pull: func(bet float64) float64 {
+			Pull: func() Reward {
 				valueMean := 20.0
 				valueStdDev := 5.0
-				return bet * NormalDistribution(valueMean, valueStdDev)
+				return Reward(NormalDistribution(valueMean, valueStdDev))
 			},
 		},
 		{
-			Pull: func(bet float64) float64 {
+			Pull: func() Reward {
 				valueMean := 90.0
 				valueStdDev := 10.0
-				return bet * NormalDistribution(valueMean, valueStdDev)
+				return Reward(NormalDistribution(valueMean, valueStdDev))
 			},
 		},
 		{
-			Pull: func(bet float64) float64 {
+			Pull: func() Reward {
 				valueMean := 80.0
 				valueStdDev := 20.0
-				return bet * NormalDistribution(valueMean, valueStdDev)
+				return Reward(NormalDistribution(valueMean, valueStdDev))
 			},
 		},
 		{
-			Pull: func(bet float64) float64 {
+			Pull: func() Reward {
 				valueMean := 75.0
 				valueStdDev := 30.0
-				return bet * NormalDistribution(valueMean, valueStdDev)
+				return Reward(NormalDistribution(valueMean, valueStdDev))
 			},
 		},
 		{
-			Pull: func(bet float64) float64 {
+			Pull: func() Reward {
 				valueMean := 85.0
 				valueStdDev := 30.0
-				return bet * NormalDistribution(valueMean, valueStdDev)
+				return Reward(NormalDistribution(valueMean, valueStdDev))
 			},
 		},
 	}
 }
 
-func EvaluateAction(action Action, levers []Lever) []float64 {
-	results := Rewards(make([]float64, len(levers)))
-
-	for i, lever := range levers {
-		results[i] = lever.Pull(action[i])
-	}
-
-	return results
+func performAction(action Action) Reward {
+	return action.Lever.Pull()
 }
 
-func GetTotalRewards(rewardsHistory []Rewards) float64 {
+func GetRewardTotal(rewardHistory []Reward) float64 {
 	total := 0.0
-	for _, rewards := range rewardsHistory {
-		for _, reward := range rewards {
-			total += reward
-		}
+	for _, reward := range rewardHistory {
+		total += float64(reward)
 	}
 	return total
 }
