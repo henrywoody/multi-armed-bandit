@@ -14,7 +14,8 @@ func (agent *EpsilonFirstAgent) Policy(state State) Action {
 		leverIndex := int(rand.Int63n(int64(state.SimulationParameters.NumLevers)))
 		lever = &state.Levers[leverIndex]
 	} else {
-		lever = GetBestLever(state)
+		leverValues := GetLeverSampleAverages(state)
+		lever = GetMaxLever(leverValues)
 	}
 
 	return Action{

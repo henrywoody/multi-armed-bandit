@@ -18,7 +18,8 @@ func getEpsilonGreedyAllocationWithVariableEpsilon(epsilon float64, state State)
 		leverIndex := int(rand.Int63n(int64(len(state.Levers))))
 		lever = &state.Levers[leverIndex]
 	} else {
-		lever = GetBestLever(state)
+		leverValues := GetLeverSampleAverages(state)
+		lever = GetMaxLever(leverValues)
 	}
 
 	return Action{
