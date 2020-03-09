@@ -16,11 +16,13 @@ type Reward float64
 
 type Agent interface {
 	Policy(State) Action
+	EvaluateActions(State) ActionValues
 }
 
 type State struct {
 	Time                 int
 	Levers               []Lever
+	ActionSpace          []Action
 	ActionHistory        []Action
 	RewardHistory        []Reward
 	SimulationParameters SimulationParameters
@@ -32,10 +34,11 @@ type SimulationParameters struct {
 }
 
 func RunSimulation(agent Agent) float64 {
-	levers := setUpLevers()
+	levers := makeLevers()
 
 	state := State{
-		Levers: levers,
+		Levers:      levers,
+		ActionSpace: makeActionSpace(levers),
 		SimulationParameters: SimulationParameters{
 			NumLevers: len(levers),
 			NumRounds: 1000,
@@ -56,17 +59,17 @@ func RunSimulation(agent Agent) float64 {
 		reward := performAction(action)
 
 		if verbose {
-			fmt.Printf("Reward: %d\n", float64(reward))
+			fmt.Printf("Reward: %f\n", float64(reward))
 		}
 
 		state.ActionHistory = append(state.ActionHistory, action)
 		state.RewardHistory = append(state.RewardHistory, reward)
 	}
 
-	return GetRewardTotal(state.RewardHistory)
+	return getRewardTotal(state.RewardHistory)
 }
 
-func setUpLevers() []Lever {
+func makeLevers() []Lever {
 	return []Lever{
 		{
 			Pull: func() Reward {
@@ -106,11 +109,22 @@ func setUpLevers() []Lever {
 	}
 }
 
+func makeActionSpace(levers []Lever) []Action {
+	actionSpace := make([]Action, len(levers))
+	for i := range levers {
+		lever := levers[i]
+		actionSpace[i] = Action{
+			Lever: &lever,
+		}
+	}
+	return actionSpace
+}
+
 func performAction(action Action) Reward {
 	return action.Lever.Pull()
 }
 
-func GetRewardTotal(rewardHistory []Reward) float64 {
+func getRewardTotal(rewardHistory []Reward) float64 {
 	total := 0.0
 	for _, reward := range rewardHistory {
 		total += float64(reward)

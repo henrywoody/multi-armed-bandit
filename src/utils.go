@@ -12,64 +12,61 @@ func NormalDistribution(mean, stdDev float64) float64 {
 	return rand.NormFloat64()*stdDev + mean
 }
 
-type LeverValue struct {
-	Lever *Lever
-	Value float64
-}
+type ActionValues map[Action]float64
 
-type LeverMetric struct {
-	Lever       *Lever
-	PullCount   int
+type ActionMetrics map[Action]ActionMetric
+
+type ActionMetric struct {
+	TimesChosen int
 	RewardTotal float64
 }
 
-func GetLeverSampleAverages(state State) []LeverValue {
-	leverValues := make([]LeverValue, len(state.Levers))
-	for i, lever := range state.Levers {
-		leverValues[i] = LeverValue{Lever: &lever, Value: 0}
+func GetActionSampleAverages(state State) ActionValues {
+	actionValues := make(ActionValues, len(state.ActionSpace))
+	for _, action := range state.ActionSpace {
+		actionValues[action] = 0
 	}
 
 	if state.Time == 0 {
-		return leverValues
+		return actionValues
 	}
 
-	leverMetrics := make(map[*Lever]LeverMetric, len(state.Levers))
+	actionMetrics := make(ActionMetrics, len(state.ActionSpace))
 	for i := 0; i < state.Time; i++ {
 		action := state.ActionHistory[i]
 		reward := state.RewardHistory[i]
-		prevMetrics, _ := leverMetrics[action.Lever]
-		leverMetrics[action.Lever] = LeverMetric{
-			Lever:       action.Lever,
-			PullCount:   prevMetrics.PullCount + 1,
+		prevMetrics, _ := actionMetrics[action]
+		actionMetrics[action] = ActionMetric{
+			TimesChosen: prevMetrics.TimesChosen + 1,
 			RewardTotal: prevMetrics.RewardTotal + float64(reward),
 		}
 	}
 
-	leverValuesMap := make(map[*Lever]float64, len(state.Levers))
-	for lever, metrics := range leverMetrics {
-		leverValuesMap[lever] = metrics.RewardTotal / float64(metrics.PullCount)
+	for action, metrics := range actionMetrics {
+		actionValues[action] = metrics.RewardTotal / float64(metrics.TimesChosen)
 	}
 
-	for i, lever := range state.Levers {
-		leverValues[i] = LeverValue{
-			Lever: &lever,
-			Value: leverValuesMap[&lever],
-		}
-	}
-
-	return leverValues
+	return actionValues
 }
 
-func GetMaxLever(values []LeverValue) *Lever {
-	var maxLever *Lever
+func GetMaxAction(actionValues ActionValues) Action {
+	var maxAction Action
 	var maxValue float64
 
-	for i, leverValue := range values {
-		if i == 0 || leverValue.Value > maxValue {
-			maxLever = leverValue.Lever
-			maxValue = leverValue.Value
+	i := 0
+	for action, value := range actionValues {
+		if i == 0 || value > maxValue {
+			maxAction = action
+			maxValue = value
 		}
+		i++
 	}
 
-	return maxLever
+	return maxAction
+}
+
+func GetRandomAction(state State) Action {
+	actionIndex := int(rand.Int63n(int64(len(state.ActionSpace))))
+	action := state.ActionSpace[actionIndex]
+	return action
 }

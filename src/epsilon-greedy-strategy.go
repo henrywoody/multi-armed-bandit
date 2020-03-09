@@ -1,28 +1,21 @@
 package main
 
-import (
-	"math/rand"
-)
-
 type EpsilonGreedyAgent struct {
 	Epsilon float64
 }
 
 func (agent *EpsilonGreedyAgent) Policy(state State) Action {
-	return getEpsilonGreedyAllocationWithVariableEpsilon(agent.Epsilon, state)
+	return getEpsilonGreedyAllocationWithVariableEpsilon(agent, agent.Epsilon, state)
 }
 
-func getEpsilonGreedyAllocationWithVariableEpsilon(epsilon float64, state State) Action {
-	var lever *Lever
+func getEpsilonGreedyAllocationWithVariableEpsilon(agent Agent, epsilon float64, state State) Action {
 	if state.Time == 0 || BernoulliDistribution(epsilon) {
-		leverIndex := int(rand.Int63n(int64(len(state.Levers))))
-		lever = &state.Levers[leverIndex]
-	} else {
-		leverValues := GetLeverSampleAverages(state)
-		lever = GetMaxLever(leverValues)
+		return GetRandomAction(state)
 	}
+	actionValues := agent.EvaluateActions(state)
+	return GetMaxAction(actionValues)
+}
 
-	return Action{
-		Lever: lever,
-	}
+func (agent *EpsilonGreedyAgent) EvaluateActions(state State) ActionValues {
+	return GetActionSampleAverages(state)
 }
