@@ -4,15 +4,9 @@ import (
 	"math/rand"
 )
 
-func BernoulliDistribution(probability float64) bool {
-	return rand.Float64() < probability
-}
-
-func NormalDistribution(mean, stdDev float64) float64 {
-	return rand.NormFloat64()*stdDev + mean
-}
-
 type ActionValues map[Action]float64
+
+type ActionProbabilities map[Action]float64
 
 type ActionMetrics map[Action]ActionMetric
 
@@ -65,8 +59,37 @@ func GetMaxAction(actionValues ActionValues) Action {
 	return maxAction
 }
 
-func GetRandomAction(state State) Action {
+func GetActionProbablistically(actionProbabilities ActionProbabilities) Action {
+	randomValue := UniformDistribution(0, 1)
+
+	var action Action
+	var probability float64
+	cumulativeProbability := 0.0
+
+	for action, probability = range actionProbabilities {
+		cumulativeProbability += probability
+		if randomValue < cumulativeProbability {
+			return action
+		}
+	}
+
+	return action
+}
+
+func GetActionRandomly(state State) Action {
 	actionIndex := int(rand.Int63n(int64(len(state.ActionSpace))))
 	action := state.ActionSpace[actionIndex]
 	return action
+}
+
+func BernoulliDistribution(probability float64) bool {
+	return rand.Float64() < probability
+}
+
+func NormalDistribution(mean, stdDev float64) float64 {
+	return rand.NormFloat64()*stdDev + mean
+}
+
+func UniformDistribution(a, b float64) float64 {
+	return a + rand.Float64()*(b-a)
 }

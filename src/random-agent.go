@@ -3,7 +3,7 @@ package main
 type RandomAgent struct{}
 
 func (agent *RandomAgent) Policy(state State) Action {
-	return GetRandomAction(state)
+	return GetActionRandomly(state)
 }
 
 func (agent *RandomAgent) EvaluateActions(state State) ActionValues {

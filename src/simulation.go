@@ -5,11 +5,20 @@ import (
 )
 
 type Lever struct {
+	ID   int
 	Pull func() Reward
+}
+
+func (lever *Lever) String() string {
+	return fmt.Sprintf("<Lever: %d>", lever.ID)
 }
 
 type Action struct {
 	Lever *Lever
+}
+
+func (action Action) String() string {
+	return fmt.Sprintf("<Action: pull %s>", action.Lever)
 }
 
 type Reward float64
@@ -72,6 +81,7 @@ func RunSimulation(agent Agent) float64 {
 func makeLevers() []Lever {
 	return []Lever{
 		{
+			ID: 1,
 			Pull: func() Reward {
 				valueMean := 20.0
 				valueStdDev := 5.0
@@ -79,6 +89,7 @@ func makeLevers() []Lever {
 			},
 		},
 		{
+			ID: 2,
 			Pull: func() Reward {
 				valueMean := 90.0
 				valueStdDev := 10.0
@@ -86,6 +97,7 @@ func makeLevers() []Lever {
 			},
 		},
 		{
+			ID: 3,
 			Pull: func() Reward {
 				valueMean := 80.0
 				valueStdDev := 20.0
@@ -93,6 +105,7 @@ func makeLevers() []Lever {
 			},
 		},
 		{
+			ID: 4,
 			Pull: func() Reward {
 				valueMean := 75.0
 				valueStdDev := 30.0
@@ -100,6 +113,7 @@ func makeLevers() []Lever {
 			},
 		},
 		{
+			ID: 5,
 			Pull: func() Reward {
 				valueMean := 85.0
 				valueStdDev := 30.0

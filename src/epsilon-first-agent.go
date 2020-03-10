@@ -6,7 +6,7 @@ type EpsilonFirstAgent struct {
 
 func (agent *EpsilonFirstAgent) Policy(state State) Action {
 	if state.Time < int(agent.Epsilon*float64(state.SimulationParameters.NumRounds)) {
-		return GetRandomAction(state)
+		return GetActionRandomly(state)
 	}
 	actionValues := agent.EvaluateActions(state)
 	return GetMaxAction(actionValues)

@@ -32,4 +32,8 @@ func main() {
 	epsilonDecreasingAgent := &EpsilonDecreasingAgent{}
 	result = RunSimulation(epsilonDecreasingAgent)
 	fmt.Printf("Epsilon-decreasing agent result:\t%.2f\n", result)
+
+	softmaxBoltzmannAgent := &SoftmaxBoltzmannAgent{Temperature: 10}
+	result = RunSimulation(softmaxBoltzmannAgent)
+	fmt.Printf("Softmax Boltzmann agent result:\t\t%.2f\n", result)
 }
