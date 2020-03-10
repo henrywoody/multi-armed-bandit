@@ -2,6 +2,32 @@
 
 Solutions to the [multi-armed bandit problem](https://en.wikipedia.org/wiki/Multi-armed_bandit).
 
+## Introduction
+
+The multi-armed bandit problem is well-studied problem in the area of reinforcement learning. The name of the problem is comes from the name "one-armed bandit" for slot machines. The problem involves an agent and a set of ![equation](http://latex.codecogs.com/png.latex?n) levers. On each round, the agent must choose one lever to pull. Each lever may have different payout amounts, and distributions and the goal for the agent is to maximize total reward over time.
+
+The key to the problem is finding a balance between exploration and exploitation. An agent needs to pull the best lever available to it as many times as possible in order to maximize reward, but the agent must explore the available levers in order to determine which is best.
+
+### Notation and Definitions
+
+An agent is an entity that exists in an environment and can make decisions and take actions within that environment. In these examples time progresses discretely in the environment. For each time ![equation](http://latex.codecogs.com/png.latex?t%20%5Cin%20%5C%7B%200%2C%201%2C%202%2C%20%5Cdots,%20T%20%5C%7D) the state of the environment is ![equation](http://latex.codecogs.com/png.latex?s_t%20%5Cin%20S), where ![equation](http://latex.codecogs.com/png.latex?S) is the *state space*. In each round (each timestep), the agent can take an action ![equation](http://latex.codecogs.com/png.latex?a%20%5Cin%20A), where ![equation](http://latex.codecogs.com/png.latex?A) is the *action space*. Taking an action results in a reward ![equation](http://latex.codecogs.com/png.latex?r%20%5Cin%20R), where ![equation](http://latex.codecogs.com/png.latex?R) is the *reward space*.
+
+In this project, an action is the choice of the lever to pull. The variable ![equation](http://latex.codecogs.com/png.latex?n) typically denotes the number of levers. Taking an action results in a reward.
+
+The true value of an action ![equation](http://latex.codecogs.com/png.latex?a) is denoted by ![equation](http://latex.codecogs.com/png.latex?Q%5E%7B%2A%7D%28a%29) and the value of the action, as estimated by the agent, at time ![equation](http://latex.codecogs.com/png.latex?t) is ![equation](http://latex.codecogs.com/png.latex?Q_%7Bt%7D%28a%29).
+
+One simple formula for estimating the value of an action, is to calculate the sample average for the action. If an action ![equation](http://latex.codecogs.com/png.latex?a) has been taken ![equation](http://latex.codecogs.com/png.latex?k_a) times, resulting in the rewards ![equation](http://latex.codecogs.com/png.latex?r_1,%20r_2,%20%5Cdots,%20r_{k_a}), the agent can use the formula:
+
+![equation](http://latex.codecogs.com/png.latex?Q_%7Bt%7D%28a%29%20=%20%5Cfrac%7B%20r_1%20%2B%20r_2%20%2B%20%5Cdots%20%2B%20r_%7Bk_a%7D%20%7D%7B%20k_a%20%7D)
+
+By estimating the value of each lever at a given time, the agent can identify the lever with the highest estimated value. The action of pulling this lever is called the *greedy* action. The action with the greatest true value is denoted by ![equation](http://latex.codecogs.com/png.latex?a%5E%2A).
+
+A *policy* defines an agent's behavior. On each timestep ![equation](http://latex.codecogs.com/png.latex?t) an agent uses its policy to examine the state of the environment ![equation](http://latex.codecogs.com/png.latex?s_t) and take an action ![equation](http://latex.codecogs.com/png.latex?a_t), resulting in a reward ![equation](http://latex.codecogs.com/png.latex?r_%7B%20t%20%2B%201%20%7D).
+
+Formally, the goal of the problem is to maximize the cumulative reward function:
+
+![equation](http://latex.codecogs.com/png.latex?%5Csum_%7B%20t%3D0%20%7D%5E%7B%20T%20%7D%20r_t)
+
 ## Solutions
 
 ### Epsilon-Greedy Strategy
@@ -22,4 +48,4 @@ Select actions according to probabilities, rather than selecting the best action
 
 
 
-![equation](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%20e%5E%7BQ_%7Bt%7D%28a%29%2F%5Ctau%7D%20%7D%7B%20%5Csum_%7Bb%3D1%7D%5E%7Bn%7D%20e%5E%7BQ_%7Bt%7D%28b%29%2F%5Ctau%7D%20%7D)
+![equation](http://latex.codecogs.com/png.latex?%5Cfrac%7B%20e%5E%7BQ_%7Bt%7D%28a%29%2F%5Ctau%7D%20%7D%7B%20%5Csum_%7Bb%3D1%7D%5E%7Bn%7D%20e%5E%7BQ_%7Bt%7D%28b%29%2F%5Ctau%7D%20%7D)
