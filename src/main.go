@@ -36,4 +36,8 @@ func main() {
 	softmaxBoltzmannAgent := &SoftmaxBoltzmannAgent{Temperature: 10}
 	result = RunSimulation(softmaxBoltzmannAgent)
 	fmt.Printf("Softmax Boltzmann agent result:\t\t%.2f\n", result)
+
+	vDBEAgent := &VDBEAgent{InverseSensitivity: 1.0}
+	result = RunSimulation(vDBEAgent)
+	fmt.Printf("VDBE agent result:\t\t\t%.2f\n", result)
 }

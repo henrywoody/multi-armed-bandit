@@ -9,10 +9,10 @@ func (agent *EpsilonGreedyAgent) Policy(state State) Action {
 }
 
 func getEpsilonGreedyAllocationWithVariableEpsilon(agent Agent, epsilon float64, state State) Action {
+	actionValues := agent.EvaluateActions(state)
 	if state.Time == 0 || BernoulliDistribution(epsilon) {
 		return GetActionRandomly(state)
 	}
-	actionValues := agent.EvaluateActions(state)
 	return GetMaxAction(actionValues)
 }
 

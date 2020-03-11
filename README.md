@@ -40,12 +40,25 @@ Formally, the goal of the problem is to maximize the cumulative reward function:
 
 ### Epsilon-Decreasing Strategy
 
-> Similar to the epsilon-greedy strategy, except that the value of `ε`  decreases as the experiment progresses, resulting in highly explorative behaviour at the start and highly exploitative behaviour at the finish.
+> Similar to the epsilon-greedy strategy, except that the value of ![equation](http://latex.codecogs.com/png.latex?%5Cvarepsilon) decreases as the experiment progresses, resulting in highly explorative behaviour at the start and highly exploitative behaviour at the finish.
 
 ### Softmax Boltzmann Strategy
 
-Select actions according to probabilities, rather than selecting the best action or a random action (as in the epsilon-_ strategies). On each round, calculate a probability of selection for each possible action (using the action's value estimate), and then select an action according to those probabilities. The preceding description applies for all softmax strategies, and the difference between difference softmax strategies is the calculation of the probabilities. In the Boltzmann case, for each action `a`, the probability of selection is:
+Select actions according to probabilities, rather than selecting the best action or a random action (as in the epsilon-_ strategies). On each round, calculate a probability of selection for each possible action (using the action's value estimate), and then select an action according to those probabilities. The preceding description applies for all softmax strategies, and the difference between difference softmax strategies is the calculation of the probabilities. In the Boltzmann case, for each action ![equation](http://latex.codecogs.com/png.latex?a), the probability of selection is:
 
 
 
 ![equation](http://latex.codecogs.com/png.latex?%5Cfrac%7B%20e%5E%7BQ_%7Bt%7D%28a%29%2F%5Ctau%7D%20%7D%7B%20%5Csum_%7Bb%3D1%7D%5E%7Bn%7D%20e%5E%7BQ_%7Bt%7D%28b%29%2F%5Ctau%7D%20%7D)
+
+
+
+### Value-Difference Based Exploration (VDBE) Strategy
+
+The Value-Difference Based Exploration strategy is built upon the epsilon-greedy strategy, and, similar to the epsilon-decreasing strategy, the value of epsilon is updated over time. In the VDBE strategy, the value of epsilon is decreased as the agent becomes more sure of its environment and increases if the agent finds that its understanding of the environment is wrong. This is calculated by taking the difference between the estimated value of an action and the reward received from taking that action (this term is called the *temporal-difference error*). For large temporal difference errors, the value of epsilon is increased, and for small errors, epsilon is decreased. See [2] for details.
+
+
+
+## Sources
+
+1. Sutton, Richard S. & Barto, Andrew G. (1998). *Reinforcement learning: an introduction*. Cambridge, MA: The MIT Press.
+2. Tokic M. (2010) Adaptive *ε*-Greedy Exploration in Reinforcement Learning Based on Value Differences. In: Dillmann R., Beyerer J., Hanebeck U.D., Schultz T. (eds) KI 2010: Advances in Artificial Intelligence. KI 2010. Lecture Notes in Computer Science, vol 6359. Springer, Berlin, Heidelberg
