@@ -43,6 +43,30 @@ func GetActionSampleAverages(state State) ActionValues {
 	return actionValues
 }
 
+func UpdateActionSampleAverages(actionValueEstimates ActionValues, actionSelectionCounts map[Action]int, state State) (ActionValues, map[Action]int) {
+	if state.Time == 0 {
+		actionValueEstimates = make(ActionValues, len(state.ActionSpace))
+		actionSelectionCounts = make(map[Action]int, len(state.ActionSpace))
+
+		for _, action := range state.ActionSpace {
+			actionValueEstimates[action] = 0
+			actionSelectionCounts[action] = 0
+		}
+
+		return actionValueEstimates, actionSelectionCounts
+	}
+
+	prevAction := state.ActionHistory[len(state.ActionHistory)-1]
+	prevReward := state.RewardHistory[len(state.RewardHistory)-1]
+
+	stepSize := 1.0 / (1.0 + float64(actionSelectionCounts[prevAction]))
+	temporalDifferenceError := float64(prevReward) - actionValueEstimates[prevAction]
+	actionValueEstimates[prevAction] += stepSize * temporalDifferenceError
+	actionSelectionCounts[prevAction]++
+
+	return actionValueEstimates, actionSelectionCounts
+}
+
 func GetMaxAction(actionValues ActionValues) Action {
 	var maxAction Action
 	var maxValue float64

@@ -5,15 +5,18 @@ import (
 )
 
 type SoftmaxBoltzmannAgent struct {
-	Temperature float64 // Should be greater than 0. Note: low values can lead to overflows. With payouts in ~[0, 100], a value of 1 seems to be the lowest that doesn't often overflow
+	Temperature           float64 // Should be greater than 0. Note: low values can lead to overflows. With payouts in ~[0, 100], a value of 1 seems to be the lowest that doesn't often overflow
+	ActionValueEstimates  ActionValues
+	ActionSelectionCounts map[Action]int
 }
 
 func (agent *SoftmaxBoltzmannAgent) Policy(state State) Action {
+	actionValues := agent.EvaluateActions(state)
+
 	if state.Time == 0 {
 		return GetActionRandomly(state)
 	}
 
-	actionValues := agent.EvaluateActions(state)
 	actionProbabilities := agent.ConvertActionsValuesToActionProbabilities(actionValues)
 	return GetActionProbablistically(actionProbabilities)
 }
@@ -37,5 +40,11 @@ func (agent *SoftmaxBoltzmannAgent) ConvertActionsValuesToActionProbabilities(ac
 }
 
 func (agent *SoftmaxBoltzmannAgent) EvaluateActions(state State) ActionValues {
-	return GetActionSampleAverages(state)
+	agent.ActionValueEstimates, agent.ActionSelectionCounts = UpdateActionSampleAverages(
+		agent.ActionValueEstimates,
+		agent.ActionSelectionCounts,
+		state,
+	)
+
+	return agent.ActionValueEstimates
 }

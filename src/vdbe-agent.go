@@ -40,20 +40,11 @@ func (agent *VDBEAgent) GetTemporalDifferenceWeight(state State) float64 {
 }
 
 func (agent *VDBEAgent) EvaluateActions(state State) ActionValues {
-	if state.Time == 0 {
-		agent.ActionValueEstimates = make(ActionValues, len(state.ActionSpace))
-		agent.ActionSelectionCounts = make(map[Action]int, len(state.ActionSpace))
-
-		return agent.ActionValueEstimates
-	}
-
-	prevAction := state.ActionHistory[len(state.ActionHistory)-1]
-	prevReward := state.RewardHistory[len(state.RewardHistory)-1]
-
-	stepSize := 1.0 / (1.0 + float64(agent.ActionSelectionCounts[prevAction]))
-	temporalDifferenceError := float64(prevReward) - agent.ActionValueEstimates[prevAction]
-	agent.ActionValueEstimates[prevAction] += stepSize * temporalDifferenceError
-	agent.ActionSelectionCounts[prevAction]++
+	agent.ActionValueEstimates, agent.ActionSelectionCounts = UpdateActionSampleAverages(
+		agent.ActionValueEstimates,
+		agent.ActionSelectionCounts,
+		state,
+	)
 
 	return agent.ActionValueEstimates
 }

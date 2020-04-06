@@ -1,6 +1,9 @@
 package main
 
-type EpsilonDecreasingAgent struct{}
+type EpsilonDecreasingAgent struct {
+	ActionValueEstimates  ActionValues
+	ActionSelectionCounts map[Action]int
+}
 
 func (agent *EpsilonDecreasingAgent) Policy(state State) Action {
 	epsilon := 1.0 / (float64(state.Time) + 1.0)
@@ -8,5 +11,11 @@ func (agent *EpsilonDecreasingAgent) Policy(state State) Action {
 }
 
 func (agent *EpsilonDecreasingAgent) EvaluateActions(state State) ActionValues {
-	return GetActionSampleAverages(state)
+	agent.ActionValueEstimates, agent.ActionSelectionCounts = UpdateActionSampleAverages(
+		agent.ActionValueEstimates,
+		agent.ActionSelectionCounts,
+		state,
+	)
+
+	return agent.ActionValueEstimates
 }

@@ -1,7 +1,9 @@
 package main
 
 type EpsilonGreedyAgent struct {
-	Epsilon float64
+	Epsilon               float64
+	ActionValueEstimates  ActionValues
+	ActionSelectionCounts map[Action]int
 }
 
 func (agent *EpsilonGreedyAgent) Policy(state State) Action {
@@ -17,5 +19,11 @@ func getEpsilonGreedyAllocationWithVariableEpsilon(agent Agent, epsilon float64,
 }
 
 func (agent *EpsilonGreedyAgent) EvaluateActions(state State) ActionValues {
-	return GetActionSampleAverages(state)
+	agent.ActionValueEstimates, agent.ActionSelectionCounts = UpdateActionSampleAverages(
+		agent.ActionValueEstimates,
+		agent.ActionSelectionCounts,
+		state,
+	)
+
+	return agent.ActionValueEstimates
 }
