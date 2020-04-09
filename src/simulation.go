@@ -4,13 +4,25 @@ import (
 	"fmt"
 )
 
+type LeverParams map[string]float64
+
 type Lever struct {
-	ID   int
-	Pull func() Reward
+	ID             int
+	Params         LeverParams
+	GenerateReward func(LeverParams) Reward
+	UpdateParams   func(LeverParams) LeverParams
 }
 
 func (lever *Lever) String() string {
 	return fmt.Sprintf("<Lever: %d>", lever.ID)
+}
+
+func (lever *Lever) Pull() Reward {
+	return lever.GenerateReward(lever.Params)
+}
+
+func (lever *Lever) Update() {
+	lever.Params = lever.UpdateParams(lever.Params)
 }
 
 type Action struct {
@@ -42,7 +54,11 @@ type SimulationParameters struct {
 	NumRounds int
 }
 
-func RunSimulation(agent Agent) float64 {
+type SimulationOptions struct {
+	StationaryLevers bool
+}
+
+func RunSimulation(agent Agent, options SimulationOptions) float64 {
 	levers := makeLevers()
 
 	state := State{
@@ -73,8 +89,11 @@ func RunSimulation(agent Agent) float64 {
 
 		state.ActionHistory = append(state.ActionHistory, action)
 		state.RewardHistory = append(state.RewardHistory, reward)
-	}
 
+		if !options.StationaryLevers {
+			updateLevers(&state)
+		}
+	}
 	return getRewardTotal(state.RewardHistory)
 }
 
@@ -82,42 +101,72 @@ func makeLevers() []Lever {
 	return []Lever{
 		{
 			ID: 1,
-			Pull: func() Reward {
-				valueMean := 20.0
-				valueStdDev := 5.0
-				return Reward(NormalDistribution(valueMean, valueStdDev))
+			Params: LeverParams{
+				"valueMean":   20.0,
+				"valueStdDev": 5.0,
+			},
+			GenerateReward: func(params LeverParams) Reward {
+				return Reward(NormalDistribution(params["valueMean"], params["valueStdDev"]))
+			},
+			UpdateParams: func(params LeverParams) LeverParams {
+				params["valueMean"] *= NormalDistribution(1, 0.01)
+				return params
 			},
 		},
 		{
 			ID: 2,
-			Pull: func() Reward {
-				valueMean := 90.0
-				valueStdDev := 10.0
-				return Reward(NormalDistribution(valueMean, valueStdDev))
+			Params: LeverParams{
+				"valueMean":   90.0,
+				"valueStdDev": 10.0,
+			},
+			GenerateReward: func(params LeverParams) Reward {
+				return Reward(NormalDistribution(params["valueMean"], params["valueStdDev"]))
+			},
+			UpdateParams: func(params LeverParams) LeverParams {
+				params["valueMean"] *= NormalDistribution(1, 0.01)
+				return params
 			},
 		},
 		{
 			ID: 3,
-			Pull: func() Reward {
-				valueMean := 80.0
-				valueStdDev := 20.0
-				return Reward(NormalDistribution(valueMean, valueStdDev))
+			Params: LeverParams{
+				"valueMean":   80.0,
+				"valueStdDev": 20.0,
+			},
+			GenerateReward: func(params LeverParams) Reward {
+				return Reward(NormalDistribution(params["valueMean"], params["valueStdDev"]))
+			},
+			UpdateParams: func(params LeverParams) LeverParams {
+				params["valueMean"] *= NormalDistribution(1, 0.01)
+				return params
 			},
 		},
 		{
 			ID: 4,
-			Pull: func() Reward {
-				valueMean := 75.0
-				valueStdDev := 30.0
-				return Reward(NormalDistribution(valueMean, valueStdDev))
+			Params: LeverParams{
+				"valueMean":   75.0,
+				"valueStdDev": 30.0,
+			},
+			GenerateReward: func(params LeverParams) Reward {
+				return Reward(NormalDistribution(params["valueMean"], params["valueStdDev"]))
+			},
+			UpdateParams: func(params LeverParams) LeverParams {
+				params["valueMean"] *= NormalDistribution(1, 0.01)
+				return params
 			},
 		},
 		{
 			ID: 5,
-			Pull: func() Reward {
-				valueMean := 85.0
-				valueStdDev := 30.0
-				return Reward(NormalDistribution(valueMean, valueStdDev))
+			Params: LeverParams{
+				"valueMean":   85.0,
+				"valueStdDev": 30.0,
+			},
+			GenerateReward: func(params LeverParams) Reward {
+				return Reward(NormalDistribution(params["valueMean"], params["valueStdDev"]))
+			},
+			UpdateParams: func(params LeverParams) LeverParams {
+				params["valueMean"] *= NormalDistribution(1, 0.01)
+				return params
 			},
 		},
 	}
@@ -144,4 +193,11 @@ func getRewardTotal(rewardHistory []Reward) float64 {
 		total += float64(reward)
 	}
 	return total
+}
+
+func updateLevers(state *State) {
+	for i := range state.Levers {
+		lever := state.Levers[i]
+		lever.Update()
+	}
 }
